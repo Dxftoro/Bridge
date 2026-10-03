@@ -3,6 +3,7 @@
 #include "register_bank.h"
 #include "stack.h"
 #include "instruction.h"
+#include "enums/exec_codes.h"
 
 namespace igca {
 
@@ -19,7 +20,7 @@ namespace igca {
 	public:
 		VirtualMachine(size_t stackSize);
 
-		int execute(Instruction32* instructions, size_t count);
+		ExecCodes execute(Instruction32* instructions, size_t count);
 
 		RegisterBank32& getRegisterBank() { return registers; }
 		FlagBank& getFlagBank() { return flags; }
