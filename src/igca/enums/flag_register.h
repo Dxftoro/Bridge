@@ -7,6 +7,7 @@ namespace igca {
 		FE,
 		FG,
 		FL,
+		FZD,
 		NONE
 	};
 
