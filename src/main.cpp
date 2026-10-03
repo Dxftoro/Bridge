@@ -13,10 +13,13 @@ int main() {
 		I(igca::Opcode::MOVRR, igca::Register::RBX, igca::Register::RDX),
 		I(igca::Opcode::MULRR, igca::Register::RAX, igca::Register::RBX),
 		I(igca::Opcode::PINW, igca::Register::RAX, igca::Register::RAX)
+		//I(igca::Opcode::JMP, 5)
 	});
 
-	vm->execute(program.data(), program.size());
+	igca::ExecCode code = vm->execute(program.data(), program.size());
 
 	delete vm;
+
+	std::println("Program executed with code: {} ({})", static_cast<int>(code), igca::execCodeToString(code));
 	return 0;
 }
