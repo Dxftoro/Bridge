@@ -2,7 +2,7 @@
 
 namespace igca {
 
-	enum class ExecCodes : int {
+	enum class ExecCode : int {
 		DIVISION_BY_ZERO,
 		SUCCESS,
 		NONE

@@ -12,12 +12,14 @@ namespace igca {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination) + registers.load(instr->args.rr.source);
 			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::ADDRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) + instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::DIVRR)] = [](VirtualMachine* vm, Instruction32* instr) {
@@ -26,79 +28,91 @@ namespace igca {
 
 			if (!source) {
 				vm->getFlagBank().store(FlagRegister::FZD, 1);
-				return;
+				return ExecCode::DIVISION_BY_ZERO;
 			}
 
 			uint32_t result = registers.load(instr->args.rr.destination) / source;
 			registers.store(instr->args.rr.destination, result);
+
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::DIVRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) / instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MODRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination) % registers.load(instr->args.rr.source);
 			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MODRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) % instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MULRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination) * registers.load(instr->args.rr.source);
 			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MULRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) * instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MOVRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			registers.store(instr->args.rr.destination, registers.load(instr->args.rr.source));
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::MOVRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			registers.store(instr->args.rv.reg, instr->args.rv.value);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::PINW)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination);
 			std::println("PIN: {}", result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::SUBRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination) - registers.load(instr->args.rr.source);
 			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
 		};
 
 		handlers[index(Opcode::SUBRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) - instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
 		};
 	}
 
-	ExecCodes VirtualMachine::execute(Instruction32* instructions, size_t count) {
+	ExecCode VirtualMachine::execute(Instruction32* instructions, size_t count) {
 		for (size_t i = 0; i < count; i++) {
-			handlers[index(instructions[i].opcode)](this, &instructions[i]);
-			if (flags.load(FlagRegister::FZD)) return ExecCodes::DIVISION_BY_ZERO;
+			ExecCode code = handlers[index(instructions[i].opcode)](this, &instructions[i]);
+			if (code != ExecCode::SUCCESS) return code;
 		}
 
-		return ExecCodes::SUCCESS;
+		return ExecCode::SUCCESS;
 	}
 
 }

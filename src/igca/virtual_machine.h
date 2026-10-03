@@ -4,11 +4,12 @@
 #include "stack.h"
 #include "instruction.h"
 #include "enums/exec_codes.h"
+#include "util/pair.h"
 
 namespace igca {
 
 	class VirtualMachine {
-		using Handler = void(*)(VirtualMachine*, Instruction32*);
+		using Handler = ExecCode(*)(VirtualMachine*, Instruction32*);
 	private:
 		RegisterBank32 registers;
 		FlagBank flags;
@@ -20,7 +21,7 @@ namespace igca {
 	public:
 		VirtualMachine(size_t stackSize);
 
-		ExecCodes execute(Instruction32* instructions, size_t count);
+		ExecCode execute(Instruction32* instructions, size_t count);
 
 		RegisterBank32& getRegisterBank() { return registers; }
 		FlagBank& getFlagBank() { return flags; }
