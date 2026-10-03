@@ -106,8 +106,11 @@ namespace igca {
 		};
 	}
 
-	ExecCode VirtualMachine::execute(Instruction32* instructions, size_t count) {
-		for (size_t i = 0; i < count; i++) {
+	ExecCode VirtualMachine::execute(Instruction32* instructions, uint32_t count) {
+		registers.store(Register::RPC, 0);
+
+		for (; registers.load(Register::RPC) < count; registers.store(Register::RPC, registers.load(Register::RPC) + 1)) {
+			uint32_t i = registers.load(Register::RPC);
 			ExecCode code = handlers[index(instructions[i].opcode)](this, &instructions[i]);
 			if (code != ExecCode::SUCCESS) return code;
 		}

@@ -9,6 +9,7 @@ namespace igca {
 		RDX,
 		RDI,
 		RSI,
+		RPC,
 		R0,
 		R1,
 		R2,

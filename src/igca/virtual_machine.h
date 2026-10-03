@@ -21,7 +21,7 @@ namespace igca {
 	public:
 		VirtualMachine(size_t stackSize);
 
-		ExecCode execute(Instruction32* instructions, size_t count);
+		ExecCode execute(Instruction32* instructions, uint32_t count);
 
 		RegisterBank32& getRegisterBank() { return registers; }
 		FlagBank& getFlagBank() { return flags; }
