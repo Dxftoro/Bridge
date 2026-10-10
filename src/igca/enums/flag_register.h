@@ -4,8 +4,9 @@ namespace igca {
 
 	enum class FlagRegister : unsigned char {
 		FZ,
-		FE,
-		FL,
+		FN,
+		FC,
+		FO,
 		FZD,
 		NONE
 	};
