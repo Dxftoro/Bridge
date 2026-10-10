@@ -3,6 +3,14 @@
 
 namespace igca {
 
+	void compare(FlagBank& flags, uint32_t a, uint32_t b) {
+		uint32_t diff = a - b;
+		flags.store(FlagRegister::FZ, diff == 0);
+		flags.store(FlagRegister::FN, (diff >> sizeof(diff) - 1) & 1);
+		flags.store(FlagRegister::FC, a < b);
+		flags.store(FlagRegister::FO, ((a ^ b) & (a & diff) & (1U << sizeof(diff))) != 0);
+	}
+
 	VirtualMachine::VirtualMachine(size_t stackSize) : stack(stackSize) {
 		setupHandlers();
 	}
@@ -23,58 +31,20 @@ namespace igca {
 		};
 
 		/* ==================== Compare instructions ==================== */
-		handlers[index(Opcode::CMPEQRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+		handlers[index(Opcode::CMPRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			FlagBank& flags = vm->getFlagBank();
 
-			flags.store(FlagRegister::FE, registers.load(instr->args.rr.destination) == registers.load(instr->args.rr.source));
+			compare(flags, registers.load(instr->args.rr.destination), registers.load(instr->args.rr.source));
 
 			return ExecCode::SUCCESS;
 		};
 		
-		handlers[index(Opcode::CMPLRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+		handlers[index(Opcode::CMPRV)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			FlagBank& flags = vm->getFlagBank();
 
-			flags.store(FlagRegister::FL, registers.load(instr->args.rr.destination) < registers.load(instr->args.rr.source));
-
-			return ExecCode::SUCCESS;
-		};
-
-		handlers[index(Opcode::CMPLERR)] = [](VirtualMachine* vm, Instruction32* instr) {
-			RegisterBank32& registers = vm->getRegisterBank();
-			FlagBank& flags = vm->getFlagBank();
-			
-			flags.store(FlagRegister::FL, registers.load(instr->args.rr.destination) < registers.load(instr->args.rr.source));
-			flags.store(FlagRegister::FE, registers.load(instr->args.rr.destination) == registers.load(instr->args.rr.source));
-
-			return ExecCode::SUCCESS;
-		};
-
-		handlers[index(Opcode::CMPEQRV)] = [](VirtualMachine* vm, Instruction32* instr) {
-			RegisterBank32& registers = vm->getRegisterBank();
-			FlagBank& flags = vm->getFlagBank();
-
-			flags.store(FlagRegister::FE, registers.load(instr->args.rv.reg) == instr->args.rv.value);
-
-			return ExecCode::SUCCESS;
-		};
-
-		handlers[index(Opcode::CMPLRV)] = [](VirtualMachine* vm, Instruction32* instr) {
-			RegisterBank32& registers = vm->getRegisterBank();
-			FlagBank& flags = vm->getFlagBank();
-
-			flags.store(FlagRegister::FL, registers.load(instr->args.rv.reg) < instr->args.rv.value);
-
-			return ExecCode::SUCCESS;
-		};
-
-		handlers[index(Opcode::CMPLERV)] = [](VirtualMachine* vm, Instruction32* instr) {
-			RegisterBank32& registers = vm->getRegisterBank();
-			FlagBank& flags = vm->getFlagBank();
-
-			flags.store(FlagRegister::FL, registers.load(instr->args.rv.reg) < instr->args.rv.value);
-			flags.store(FlagRegister::FE, registers.load(instr->args.rv.reg) == instr->args.rv.value);
+			compare(flags, registers.load(instr->args.rv.reg), instr->args.rv.value);
 
 			return ExecCode::SUCCESS;
 		};
@@ -106,6 +76,70 @@ namespace igca {
 		handlers[index(Opcode::JMP)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			registers.store(Register::RPC, instr->args.v.value);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JE)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (flags.load(FlagRegister::FZ)) registers.store(Register::RPC, instr->args.v.value);
+			
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JG)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (!flags.load(FlagRegister::FN) && !flags.load(FlagRegister::FZ)) 
+				registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JGE)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (!flags.load(FlagRegister::FN)) registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JL)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (flags.load(FlagRegister::FN) && !flags.load(FlagRegister::FZ)) registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JLE)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (flags.load(FlagRegister::FN)) registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JNE)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (!flags.load(FlagRegister::FZ)) registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::JZ)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			if (flags.load(FlagRegister::FZ)) registers.store(Register::RPC, instr->args.v.value);
+
 			return ExecCode::SUCCESS;
 		};
 
