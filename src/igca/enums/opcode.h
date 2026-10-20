@@ -7,6 +7,7 @@ namespace igca {
 		CMPRR, CMPRV,
 		DIVRR, DIVRV,
 		JE, JG, JGE, JL, JLE, JNE, JMP, JZ,
+		LOOP,
 		MODRR, MODRV,
 		MOVRR, MOVRV,
 		MULRR, MULRV,

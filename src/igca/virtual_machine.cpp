@@ -143,6 +143,18 @@ namespace igca {
 			return ExecCode::SUCCESS;
 		};
 
+		handlers[index(Opcode::LOOP)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			FlagBank& flags = vm->getFlagBank();
+
+			uint32_t value = registers.load(Register::RCX);
+			registers.store(Register::RCX, value - 1);
+
+			if (registers.load(Register::RCX)) registers.store(Register::RPC, instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
 		/* ==================== Modulo instructions ==================== */
 		handlers[index(Opcode::MODRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();

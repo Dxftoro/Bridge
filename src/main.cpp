@@ -25,14 +25,21 @@ int main() {
 	//	I(igca::Opcode::PINW, igca::Register::RAX, igca::Register::RAX)
 	//});
 
+	//std::vector<igca::Instruction32> program({
+	//	I(igca::Opcode::MOVRV, igca::Register::RCX, 0),
+	//	I(igca::Opcode::PINW, igca::Register::RCX, igca::Register::RCX),
+	//	I(igca::Opcode::ADDRV, igca::Register::RCX, 1),
+	//	I(igca::Opcode::CMPRV, igca::Register::RCX, 10),
+	//	I(igca::Opcode::JNE, 1)
+	//});
+
+
 	std::vector<igca::Instruction32> program({
-		I(igca::Opcode::MOVRV, igca::Register::RCX, 0),
+		I(igca::Opcode::MOVRV, igca::Register::RCX, 10),
 		I(igca::Opcode::PINW, igca::Register::RCX, igca::Register::RCX),
 		I(igca::Opcode::ADDRV, igca::Register::RCX, 1),
-		I(igca::Opcode::CMPRV, igca::Register::RCX, 10),
-		I(igca::Opcode::JNE, 1)
+		I(igca::Opcode::LOOP, 1)
 	});
-
 
 	igca::ExecCode code = vm->execute(program.data(), program.size());
 
