@@ -32,7 +32,10 @@ namespace igca {
 		}
 
 		void pop() { current--; }
-		T top() const { return buffer[current]; }
+		T top() const {
+			assert(current < stackSize && "Top pointer out of bounds!");
+			return buffer[current - 1];
+		}
 
 		void reset() { current = 0; }
 	};

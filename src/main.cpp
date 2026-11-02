@@ -5,7 +5,7 @@
 using I = igca::Instruction32;
 
 int main() {
-	igca::VirtualMachine* vm = new igca::VirtualMachine(128);
+	igca::VirtualMachine* vm = new igca::VirtualMachine(2048);
 	
 	//std::vector<igca::Instruction32> program({
 	//	I(igca::Opcode::MOVRV, igca::Register::RAX, 45),
@@ -33,12 +33,16 @@ int main() {
 	//	I(igca::Opcode::JNE, 1)
 	//});
 
-
 	std::vector<igca::Instruction32> program({
 		I(igca::Opcode::MOVRV, igca::Register::RCX, 10),
-		I(igca::Opcode::PINW, igca::Register::RCX, igca::Register::RCX),
-		I(igca::Opcode::ADDRV, igca::Register::RCX, 1),
-		I(igca::Opcode::LOOP, 1)
+		I(igca::Opcode::PUSHR, igca::Register::RCX),
+		//I(igca::Opcode::PUSHV, 999),
+		I(igca::Opcode::LOOP, 1),
+
+		I(igca::Opcode::MOVRV, igca::Register::RCX, 10),
+		I(igca::Opcode::POP, igca::Register::RAX),
+		I(igca::Opcode::PINW, igca::Register::RAX, igca::Register::RAX),
+		I(igca::Opcode::LOOP, 4)
 	});
 
 	igca::ExecCode code = vm->execute(program.data(), program.size());
