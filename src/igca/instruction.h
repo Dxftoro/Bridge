@@ -22,6 +22,10 @@ namespace igca {
 		Register source;
 	};
 
+	struct Reg {
+		Register reg;
+	};
+
 	template <typename T>
 	struct Instruction {
 	public:
@@ -31,6 +35,7 @@ namespace igca {
 			RegValue<T> rv;
 			Value<T> v;
 			RegReg rr;
+			Reg r;
 		} args;
 
 		Instruction(Opcode _opcode, Register reg, T value) : opcode(_opcode) {
@@ -45,6 +50,10 @@ namespace igca {
 		Instruction(Opcode _opcode, Register destination, Register source) : opcode(_opcode) {
 			args.rr.destination = destination;
 			args.rr.source = source;
+		}
+
+		Instruction(Opcode _opcode, Register reg) : opcode(_opcode) {
+			args.r.reg = reg;
 		}
 	};
 

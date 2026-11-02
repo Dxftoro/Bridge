@@ -26,6 +26,8 @@ namespace igca {
 		RegisterBank32& getRegisterBank() { return registers; }
 		FlagBank& getFlagBank() { return flags; }
 		Stack32& getStack() { return stack; }
+
+		void reset();
 	};
 
 }

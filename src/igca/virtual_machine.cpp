@@ -30,6 +30,21 @@ namespace igca {
 			return ExecCode::SUCCESS;
 		};
 
+		/* ==================== AND instructions ==================== */
+		handlers[index(Opcode::ANDRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rr.destination) & registers.load(instr->args.rr.source);
+			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::ANDRV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rv.reg) & instr->args.rv.value;
+			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
+		};
+
 		/* ==================== Compare instructions ==================== */
 		handlers[index(Opcode::CMPRR)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
@@ -69,6 +84,19 @@ namespace igca {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rv.reg) / instr->args.rv.value;
 			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
+		};
+
+		/* ==================== Increment/Decrement ==================== */
+		handlers[index(Opcode::DEC)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			registers.store(instr->args.r.reg, registers.load(instr->args.r.reg) - 1);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::INC)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			registers.store(instr->args.r.reg, registers.load(instr->args.r.reg) + 1);
 			return ExecCode::SUCCESS;
 		};
 
@@ -198,11 +226,86 @@ namespace igca {
 			return ExecCode::SUCCESS;
 		};
 
+		/* ==================== OR instructions ==================== */
+		handlers[index(Opcode::ORRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rr.destination) | registers.load(instr->args.rr.source);
+			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::ORRV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rv.reg) | instr->args.rv.value;
+			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
+		};
+
 		/* ==================== (REMOVE PLS) Pin instructions ==================== */
 		handlers[index(Opcode::PINW)] = [](VirtualMachine* vm, Instruction32* instr) {
 			RegisterBank32& registers = vm->getRegisterBank();
 			uint32_t result = registers.load(instr->args.rr.destination);
 			std::println("PIN: {}", result);
+			return ExecCode::SUCCESS;
+		};
+
+		/* ==================== Pushes ==================== */
+		handlers[index(Opcode::PUSHR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			Stack32& stack = vm->getStack();
+
+			stack.push(registers.load(instr->args.r.reg));
+
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::PUSHV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			Stack32& stack = vm->getStack();
+
+			stack.push(instr->args.v.value);
+
+			return ExecCode::SUCCESS;
+		};
+
+		/* ==================== Pop ==================== */
+		handlers[index(Opcode::POP)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			Stack32& stack = vm->getStack();
+
+			registers.store(instr->args.r.reg, stack.top());
+			stack.pop();
+
+			return ExecCode::SUCCESS;
+		};
+
+		/* ==================== Left shifts ==================== */
+		handlers[index(Opcode::SHLRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rr.destination) << registers.load(instr->args.rr.source);
+			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::SHLRV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rv.reg) << instr->args.rv.value;
+			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
+		};
+
+		/* ==================== Right shifts ==================== */
+		handlers[index(Opcode::SHLRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rr.destination) >> registers.load(instr->args.rr.source);
+			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::SHLRV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rv.reg) >> instr->args.rv.value;
+			registers.store(instr->args.rv.reg, result);
 			return ExecCode::SUCCESS;
 		};
 
@@ -220,6 +323,21 @@ namespace igca {
 			registers.store(instr->args.rv.reg, result);
 			return ExecCode::SUCCESS;
 		};
+
+		/* ==================== XOR instructions ==================== */
+		handlers[index(Opcode::XORRR)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rr.destination) ^ registers.load(instr->args.rr.source);
+			registers.store(instr->args.rr.destination, result);
+			return ExecCode::SUCCESS;
+		};
+
+		handlers[index(Opcode::XORRV)] = [](VirtualMachine* vm, Instruction32* instr) {
+			RegisterBank32& registers = vm->getRegisterBank();
+			uint32_t result = registers.load(instr->args.rv.reg) ^ instr->args.rv.value;
+			registers.store(instr->args.rv.reg, result);
+			return ExecCode::SUCCESS;
+		};
 	}
 
 	ExecCode VirtualMachine::execute(Instruction32* instructions, uint32_t count) {
@@ -233,6 +351,12 @@ namespace igca {
 		}
 
 		return ExecCode::SUCCESS;
+	}
+
+	void VirtualMachine::reset() {
+		registers.reset();
+		flags.reset();
+		stack.reset();
 	}
 
 }
