@@ -32,8 +32,9 @@ namespace igca {
 		}
 
 		void pop() { current--; }
-
 		T top() const { return buffer[current]; }
+
+		void reset() { current = 0; }
 	};
 
 	using Stack32 = Stack<uint32_t>;
